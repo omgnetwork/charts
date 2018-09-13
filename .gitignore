@@ -1,0 +1,14 @@
+# Editor files
+*~
+*.swp
+
+# System files
+DS_Store*
+Thumbs.db
+
+# Per-environment file
+.envrc
+
+# Development files
+values_dev.yaml
+*.tgz

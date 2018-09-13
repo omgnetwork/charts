@@ -1,0 +1,89 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "ewallet.fullname" . }}-init-db
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ template "ewallet.name" . }}
+    helm.sh/chart: {{ template "ewallet.chart" . }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "20"
+    "helm.sh/hook-delete-policy": "hook-succeeded"
+spec:
+  template:
+    metadata:
+      name: {{ template "ewallet.fullname" . }}-init-db
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/name: {{ template "ewallet.name" . }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: {{ .Chart.Name }}-init-db-job
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+          args:
+            - set -xe;
+              mix do local.hex --force, local.rebar --force, ecto.migrate
+          env:
+{{- /* ================================================ */}}
+{{- /* Application Environment */}}
+{{- /* ================================================ */}}
+            - name: MIX_ENV
+              value: prod
+{{- /* ================================================ */}}
+{{- /* Application Configuration */}}
+{{- /* ================================================ */}}
+            - name: BASE_URL
+              value: {{ required "baseUrl must be set" .Values.baseUrl | quote }}
+            - name: EWALLET_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}
+                  key: ewallet-secret-key
+            - name: LOCAL_LEDGER_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}
+                  key: local-ledger-secret-key
+{{- /* ================================================ */}}
+{{- /* Database Configuration */}}
+{{- /* ================================================ */}}
+{{- if .Values.postgresql.enabled }}
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}-postgresql
+                  key: ewallet-password
+            - name: DATABASE_URL
+              value: postgresql://ewallet:$(DATABASE_PASSWORD)@{{ template "postgresql.fullname" . }}/ewallet
+            - name: LOCAL_LEDGER_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}-postgresql
+                  key: local-ledger-password
+            - name: LOCAL_LEDGER_DATABASE_URL
+              value: postgresql://ledger:$(LOCAL_LEDGER_DATABASE_PASSWORD)@{{ template "postgresql.fullname" . }}/local_ledger
+{{- else }}
+            - name: DATABASE_URL
+              value: {{ required "eWalletDbUrl is required to be set" .Values.ewalletDbUrl | quote }}
+            - name: LOCAL_LEDGER_DATABASE_URL
+              value: {{ required "localLedgerDbUrl is required to be set" .Values.localLedgerDbUrl | quote }}
+{{- end }}
+{{- /* ================================================ */}}
+{{- /* Monitoring */}}
+{{- /* ================================================ */}}
+{{- if .Values.sentryDsn | default "" | ne "" }}
+            - name: SENTRY_DSN
+              value: {{ .Values.sentryDsn }}
+{{- end }}
+{{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml . | trim | indent 8 }}
+{{- end }}

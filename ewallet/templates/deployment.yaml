@@ -1,0 +1,197 @@
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "ewallet.fullname" . }}
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ template "ewallet.name" . }}
+    helm.sh/chart: {{ template "ewallet.chart" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ template "ewallet.name" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/name: {{ template "ewallet.name" . }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+{{- /* ================================================ */}}
+{{- /* Pod Environment */}}
+{{- /* ================================================ */}}
+            - name: NODE_DNS
+              value: {{ template "ewallet.fullname" . }}
+            - name: NODE_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+{{- /* ================================================ */}}
+{{- /* Application Environment */}}
+{{- /* ================================================ */}}
+            - name: MIX_ENV
+              value: prod
+{{- /* ================================================ */}}
+{{- /* Application Configuration */}}
+{{- /* ================================================ */}}
+            - name: BASE_URL
+              value: {{ required "baseUrl is required to be set" .Values.baseUrl | quote }}
+            - name: EWALLET_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}
+                  key: ewallet-secret-key
+            - name: LOCAL_LEDGER_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}
+                  key: local-ledger-secret-key
+            - name: ERLANG_COOKIE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}
+                  key: erlang-cookie
+{{- if .Values.balanceCachingFrequency | default "" | ne "" }}
+            - name: BALANCE_CACHING_FREQUENCY
+              value: {{ .Values.balanceCachingFrequency | quote }}
+{{- end }}
+{{- if .Values.balanceCachingStrategy | default "" | ne "" }}
+            - name: BALANCE_CACHING_STRATEGY
+              value: {{ .Values.balanceCachingStrategy | quote }}
+{{- end }}
+{{- if .Values.senderEmail | default "" | ne "" }}
+            - name: SENDER_EMAIL
+              value: {{ .Values.senderEmail | quote }}
+{{- end }}
+{{- if .Values.smtpHost | default "" | ne "" }}
+            - name: SMTP_HOST
+              value: {{ .Values.smtpHost | quote }}
+{{- end }}
+{{- if .Values.smtpPort | default "" | ne "" }}
+            - name: SMTP_PORT
+              value: {{ .Values.smtpPort | quote }}
+{{- end }}
+{{- if .Values.smtpUser | default "" | ne "" }}
+            - name: SMTP_USER
+              value: {{ .Values.smtpUser | quote }}
+{{- end }}
+{{- if .Values.smtpPassword | default "" | ne "" }}
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}
+                  key: smtp-password
+{{- end }}
+{{- /* ================================================ */}}
+{{- /* Database Configuration */}}
+{{- /* ================================================ */}}
+{{- if .Values.postgresql.enabled }}
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}-postgresql
+                  key: ewallet-password
+            - name: DATABASE_URL
+              value: postgresql://ewallet:$(DATABASE_PASSWORD)@{{ template "postgresql.fullname" . }}/ewallet
+            - name: LOCAL_LEDGER_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}-postgresql
+                  key: local-ledger-password
+            - name: LOCAL_LEDGER_DATABASE_URL
+              value: postgresql://ledger:$(LOCAL_LEDGER_DATABASE_PASSWORD)@{{ template "postgresql.fullname" . }}/local_ledger
+{{- else }}
+            - name: DATABASE_URL
+              value: {{ required "eWalletDbUrl is required to be set" .Values.ewalletDbUrl | quote }}
+            - name: LOCAL_LEDGER_DATABASE_URL
+              value: {{ required "localLedgerDbUrl is required to be set" .Values.localLedgerDbUrl | quote }}
+{{- end }}
+{{- /* ================================================ */}}
+{{- /* Monitoring */}}
+{{- /* ================================================ */}}
+{{- if .Values.sentryDsn | default "" | ne "" }}
+            - name: SENTRY_DSN
+              value: {{ .Values.sentryDsn }}
+{{- end }}
+{{- /* ================================================ */}}
+{{- /* Services */}}
+{{- /* ================================================ */}}
+            - name: PORT
+              value: {{ .Values.service.port | quote }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            - name: epmd
+              containerPort: 4369
+              protocol: TCP
+            - name: dist0
+              containerPort: 6900
+              protocol: TCP
+            - name: dist1
+              containerPort: 6901
+              protocol: TCP
+            - name: dist2
+              containerPort: 6902
+              protocol: TCP
+            - name: dist3
+              containerPort: 6903
+              protocol: TCP
+            - name: dist4
+              containerPort: 6904
+              protocol: TCP
+            - name: dist5
+              containerPort: 6905
+              protocol: TCP
+            - name: dist6
+              containerPort: 6906
+              protocol: TCP
+            - name: dist7
+              containerPort: 6907
+              protocol: TCP
+            - name: dist8
+              containerPort: 6908
+              protocol: TCP
+            - name: dist9
+              containerPort: 6909
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: {{ .Values.service.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.service.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.service.livenessProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: {{ .Values.service.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.service.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.service.readinessProbe.failureThreshold }}
+          resources:
+{{ toYaml .Values.resources | trim | indent 12 }}
+{{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml . | trim | indent 8 }}
+{{- end }}
+{{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | trim | indent 8 }}
+{{- end }}
+{{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | trim | indent 8 }}
+{{- end }}
+{{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | trim | indent 8 }}
+{{- end }}

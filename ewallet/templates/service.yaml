@@ -1,0 +1,67 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ template "ewallet.fullname" . }}
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ template "ewallet.name" . }}
+    helm.sh/chart: {{ template "ewallet.chart" . }}
+spec:
+  type: {{ .Values.service.type }}
+{{- if eq .Values.service.type "ClusterIP" }}
+  clusterIP: {{ .Values.service.clusterIP }}
+{{- end }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 4369
+      targetPort: epmd
+      protocol: TCP
+      name: epmd
+    - protocol: TCP
+      port: 6900
+      targetPort: dist0
+      name: dist0
+    - protocol: TCP
+      port: 6901
+      targetPort: dist1
+      name: dist1
+    - protocol: TCP
+      port: 6902
+      targetPort: dist2
+      name: dist2
+    - protocol: TCP
+      port: 6903
+      targetPort: dist3
+      name: dist3
+    - protocol: TCP
+      port: 6904
+      targetPort: dist4
+      name: dist4
+    - protocol: TCP
+      port: 6905
+      targetPort: dist5
+      name: dist5
+    - protocol: TCP
+      port: 6906
+      targetPort: dist6
+      name: dist6
+    - protocol: TCP
+      port: 6907
+      targetPort: dist7
+      name: dist7
+    - protocol: TCP
+      port: 6908
+      targetPort: dist8
+      name: dist8
+    - protocol: TCP
+      port: 6909
+      targetPort: dist9
+      name: dist9
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ template "ewallet.name" . }}

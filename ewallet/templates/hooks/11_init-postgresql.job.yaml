@@ -1,0 +1,67 @@
+{{- if .Values.postgresql.enabled -}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "ewallet.fullname" . }}-init-postgresql
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ template "ewallet.name" . }}
+    helm.sh/chart: {{ template "ewallet.chart" . }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "11"
+    "helm.sh/hook-delete-policy": "hook-succeeded"
+spec:
+  template:
+    metadata:
+      name: {{ template "ewallet.fullname" . }}-init-postgresql
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/name: {{ template "ewallet.name" . }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: {{ .Chart.Name }}-init-postgresql-job
+          image: "postgres:9.6.2"
+          imagePullPolicy: ""
+          command:
+            - sh
+            - -c
+          args:
+            - set -xe;
+              export PGPASSFILE="/data/pgpass";
+              mkdir -p /data;
+              echo "*:*:*:$(POSTGRES_USER):$(POSTGRES_PASSWORD)" | tee "$PGPASSFILE" > /dev/null;
+              chmod 0600 "$PGPASSFILE";
+              (
+                echo "CREATE USER ewallet WITH PASSWORD '$(POSTGRES_EWALLET_PASSWORD)';";
+                echo "CREATE USER ledger WITH PASSWORD '$(POSTGRES_LEDGER_PASSWORD)';";
+                echo "CREATE DATABASE ewallet;";
+                echo "CREATE DATABASE local_ledger;";
+                echo "GRANT ALL PRIVILEGES ON DATABASE ewallet TO ewallet;";
+                echo "GRANT ALL PRIVILEGES ON DATABASE local_ledger TO ledger;"
+              ) | tee /data/init.sql > /dev/null;
+              psql -v ON_ERROR_STOP=1 --host="$(POSTGRES_HOST)" --username="$(POSTGRES_USER)" template1 < /data/init.sql
+          env:
+            - name: POSTGRES_HOST
+              value: {{ template "postgresql.fullname" . }}
+            - name: POSTGRES_USER
+              value: {{ .Values.postgresql.postgresUser }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "postgresql.fullname" . }}
+                  key: postgres-password
+            - name: POSTGRES_EWALLET_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}-postgresql
+                  key: ewallet-password
+            - name: POSTGRES_LEDGER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}-postgresql
+                  key: local-ledger-password
+{{- end -}}

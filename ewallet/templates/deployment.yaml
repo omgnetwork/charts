@@ -73,6 +73,14 @@ spec:
             - name: BALANCE_CACHING_STRATEGY
               value: {{ .Values.balanceCachingStrategy | quote }}
 {{- end }}
+{{- if .Values.standalone | default "" | ne "" }}
+            - name: ENABLE_STANDALONE
+              value: {{ .Values.standalone | quote }}
+{{- end }}
+{{- if .Values.redirectPrefixes | default "" | ne "" }}
+            - name: REDIRECT_URL_PREFIXES
+              value: {{ .Values.redirectPrefixes | quote }}
+{{- end }}
 {{- if .Values.senderEmail | default "" | ne "" }}
             - name: SENDER_EMAIL
               value: {{ .Values.senderEmail | quote }}

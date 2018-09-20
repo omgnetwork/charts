@@ -1,6 +1,6 @@
 apiVersion: v1
 name: ewallet
-version: 0.2.0
+version: 0.3.0
 appVersion: "1.0.0"
 description: OmiseGO eWallet allows businesses and individuals to setup and run their own digital wallet services.
 sources:

@@ -95,6 +95,21 @@ localLedgerDbUrl: ""
 balanceCachingFrequency: ""
 balanceCachingStrategy: "since_last_cached"
 
+## Enable standalone mode.
+##
+## Enabling standalone will allow eWallet to work independent of an external
+## integration. Setting this to false will make eWallet require integration
+## with external system.
+##
+standalone: false
+
+## Redirect endpoints configuration.
+##
+## Restrict external redirects in eWallet endpoints (e.g. email verification)
+## to specific domain. Comma-separated list of prefixes e.g. http://example.com/
+##
+redirectPrefixes:
+
 ## Email address to send system email as
 ##
 ## All email sent from the eWallet server (e.g. invitations) will use

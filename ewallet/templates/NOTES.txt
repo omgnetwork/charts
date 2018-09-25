@@ -1,4 +1,9 @@
-1. Get the application URL by running these commands:
+1. Run the initial seeds:
+
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ template "ewallet.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl exec -it --namespace {{ .Release.Namespace }} $POD_NAME -- mix seed
+
+2. Get the application URL by running these commands:
 
 {{- if contains "NodePort" .Values.service.type }}
 
@@ -21,8 +26,3 @@
   kubectl port-forward --namespace {{ .Release.Namespace }} $POD_NAME 8080:{{ .Values.service.port }}
 
 {{- end }}
-
-2. You also want to run initial seed:
-
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ template "ewallet.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
-  kubectl exec -it --namespace {{ .Release.Namespace }} $POD_NAME -- mix seed

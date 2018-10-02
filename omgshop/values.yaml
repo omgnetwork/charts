@@ -1,0 +1,182 @@
+## Default values for OmiseGO Sample Server.
+## This is a YAML-formatted file.
+## Declare variables to be passed into your templates.
+
+
+## ============================================================================
+## Image configuration
+## ============================================================================
+
+image:
+  repository: gcr.io/omise-go/omgshop
+  tag: latest
+  pullPolicy: IfNotPresent
+
+  ## Secret name to pull from a private registry.
+  ##
+  ## The secret must be created prior to installing this Helm chart.
+  ## See also https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ##
+  # imagePullSecrets:
+  #   - registrySecretName
+
+
+## ============================================================================
+## Replication
+## ============================================================================
+
+## Number of sample server process to spawn.
+##
+replicaCount: 1
+
+
+## ============================================================================
+## Application configuration
+## ============================================================================
+
+## Secret key for signing cookies
+##
+## A secure random string for signing cookies in Sample Server.
+## Can be generated with `openssl rand -base64 32`.
+##
+secretKey: ""
+
+## URL for the eWallet instance
+##
+## URL to an instance of eWallet to connect to.
+## Must omit trailing slash and include the protocol.
+## For example: https://www.example.com
+##
+ewalletUrl: ""
+
+## Access key for the eWallet instance
+##
+## Access key of the eWallet instance to connect to.
+## This key could be retrieved during seeds or from the admin panel.
+##
+ewalletAccessKey: ""
+
+## Secret key for the eWallet instance
+##
+## Secret key for the access key given above.
+## This key could be retrieved during seeds or from the admin panel.
+##
+ewalletSecretKey: ""
+
+## Account ID for the eWallet instance
+## This ID could be retrieved during seeds or from the admin panel.
+##
+ewalletAccountId: ""
+
+
+## ============================================================================
+## Monitoring
+## ============================================================================
+
+## Sentry DSN URL for error reporting.
+##
+## The Sentry DSN URL as returned from the Sentry application.
+## See also https://github.com/helm/charts/blob/master/stable/sentry/
+##
+sentryDsn: ""
+
+
+## ============================================================================
+## Service and ingress
+## ============================================================================
+
+service:
+  type: ClusterIP
+  port: 4000
+
+  ## Setup Kubernetes liveness probe and readiness probe for the service.
+  ## See also https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
+  ##
+  livenessProbe:
+    initialDelaySeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 5
+
+  readinessProbe:
+    initialDelaySeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 5
+
+## Setup endpoint for OMGShop.
+## See also https://kubernetes.io/docs/concepts/services-networking/ingress/
+##
+ingress:
+  enabled: false
+  annotations: {}
+  path: /
+  hosts:
+    - example.local
+  tls: []
+
+
+## ============================================================================
+## Node configurations
+## ============================================================================
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+
+## ============================================================================
+## In-chart PostgreSQL
+## ============================================================================
+##
+## The in-chart PostgreSQL is intended to be used for testing environment
+## for production environment, please use a fault-tolerant setup such as
+## Stolon (https://github.com/helm/charts/tree/master/stable/stolon)
+## or managed service such as Google Cloud SQL or Amazon RDS.
+##
+## To use in-chart PostgreSQL, set `postgresql.enabled` to true and unset
+## `dbUrl`.
+##
+
+postgresql:
+
+  ## Use the PostgreSQL chart dependency.
+  ##
+  enabled: false
+
+  ## PostgreSQL credentials to create.
+  ##
+  ## Note that OMGShop will create a new user with limited privileges
+  ## with random password on setup if `postgresql.enabled` is true.
+  ## It should be safe to leave this as default.
+  ##
+  postgresUser: postgres
+  postgresDatabase: postgres
+
+  ## Persistent Volume Storage configuration.
+  ## See also https://kubernetes.io/docs/user-guide/persistent-volumes
+  ##
+  persistence:
+
+    ## Enable PostgreSQL persistence using Persistent Volume Claims.
+    ##
+    enabled: true
+
+    ## Persistent Volume Storage Class
+    ## Refer to the cloud provider's documentation for available classes.
+    ##
+    # storageClass: ""
+
+    ## Manually managed Persistent Volume Claim
+    ##
+    ## Use the given PVC instead of dynamically create a new one.
+    ## The PVC must be created manually before installing this chart.
+    ##
+    # existingClaim:
+
+    ## Claim access and sizes
+    ##
+    ## The size of the claim depends on how much traffic you expected
+    ## to have. Note that you cannot easily resize PVC once it's created.
+    ##
+    accessMode: ReadWriteOnce
+    size: 1Gi

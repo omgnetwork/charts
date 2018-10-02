@@ -1,0 +1,11 @@
+apiVersion: v1
+name: omgshop
+version: 0.2.0
+appVersion: "0.1.0"
+description: Sample loyalty points web service with OmiseGO eWallet Server integration.
+sources:
+  - https://github.com/omisego/sample-server
+home: https://omisego.network/
+maintainers:
+  - name: Kridsada Thanabulpong
+    email: sirn@omise.co

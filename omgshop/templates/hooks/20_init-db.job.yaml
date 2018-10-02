@@ -1,0 +1,87 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "omgshop.fullname" . }}-init-db
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ template "omgshop.name" . }}
+    helm.sh/chart: {{ template "omgshop.chart" . }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "20"
+    "helm.sh/hook-delete-policy": "hook-succeeded"
+spec:
+  template:
+    metadata:
+      name: {{ template "omgshop.fullname" . }}-init-db
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/name: {{ template "omgshop.name" . }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: {{ .Chart.Name }}-init-db-job
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+          args:
+            - set -xe;
+              bundle exec rake db:migrate
+          env:
+{{- /* ================================================ */}}
+{{- /* Pod Environment */}}
+{{- /* ================================================ */}}
+            - name: DEPLOYMENT_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+{{- /* ================================================ */}}
+{{- /* Application Environment */}}
+{{- /* ================================================ */}}
+            - name: RAILS_ENV
+              value: production
+{{- /* ================================================ */}}
+{{- /* Application Configuration */}}
+{{- /* ================================================ */}}
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "omgshop.fullname" . }}
+                  key: secret-key
+            - name: OMISEGO_EWALLET_URL
+              value: {{ .Values.ewalletUrl | quote }}
+            - name: OMISEGO_ACCESS_KEY
+              value: {{ .Values.ewalletAccessKey | quote }}
+            - name: OMISEGO_SECRET_KEY
+              value: {{ .Values.ewalletSecretKey | quote }}
+            - name: ACCOUNT_ID
+              value: {{ .Values.ewalletAccountId | quote }}
+{{- /* ================================================ */}}
+{{- /* Database Configuration */}}
+{{- /* ================================================ */}}
+{{- if .Values.postgresql.enabled }}
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "omgshop.fullname" . }}-postgresql
+                  key: omgshop-password
+            - name: DATABASE_URL
+              value: postgresql://omgshop:$(DATABASE_PASSWORD)@{{ template "postgresql.fullname" . }}/omgshop
+{{- else }}
+            - name: DATABASE_URL
+              value: {{ .Values.dbUrl | quote }}
+{{- end }}
+{{- /* ================================================ */}}
+{{- /* Monitoring */}}
+{{- /* ================================================ */}}
+{{- if .Values.sentryDsn | default "" | ne "" }}
+            - name: SENTRY_DSN
+              value: {{ .Values.sentryDsn | quote }}
+{{- end }}
+{{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml . | trim | indent 8 }}
+{{- end }}

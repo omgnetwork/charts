@@ -1,0 +1,117 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "omgshop.fullname" . }}
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ template "omgshop.name" . }}
+    helm.sh/chart: {{ template "omgshop.chart" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ template "omgshop.name" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/name: {{ template "omgshop.name" . }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+{{- /* ================================================ */}}
+{{- /* Pod Environment */}}
+{{- /* ================================================ */}}
+            - name: DEPLOYMENT_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+{{- /* ================================================ */}}
+{{- /* Application Environment */}}
+{{- /* ================================================ */}}
+            - name: RAILS_ENV
+              value: production
+{{- /* ================================================ */}}
+{{- /* Application Configuration */}}
+{{- /* ================================================ */}}
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "omgshop.fullname" . }}
+                  key: secret-key
+            - name: OMISEGO_EWALLET_URL
+              value: {{ required "ewalletUrl is required to be set" .Values.ewalletUrl | quote }}
+            - name: OMISEGO_ACCESS_KEY
+              value: {{ required "ewalletAccessKey is required to be set" .Values.ewalletAccessKey | quote }}
+            - name: OMISEGO_SECRET_KEY
+              value: {{ required "ewalletSecretKey is required to be set" .Values.ewalletSecretKey | quote }}
+            - name: ACCOUNT_ID
+              value: {{ required "ewalletAccountId is required to be set" .Values.ewalletAccountId | quote }}
+{{- /* ================================================ */}}
+{{- /* Database Configuration */}}
+{{- /* ================================================ */}}
+{{- if .Values.postgresql.enabled }}
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "omgshop.fullname" . }}-postgresql
+                  key: omgshop-password
+            - name: DATABASE_URL
+              value: postgresql://omgshop:$(DATABASE_PASSWORD)@{{ template "postgresql.fullname" . }}/omgshop
+{{- else }}
+            - name: DATABASE_URL
+              value: {{ required "dbUrl is required to be set" .Values.dbUrl | quote }}
+{{- end }}
+{{- /* ================================================ */}}
+{{- /* Monitoring */}}
+{{- /* ================================================ */}}
+{{- if .Values.sentryDsn | default "" | ne "" }}
+            - name: SENTRY_DSN
+              value: {{ .Values.sentryDsn | quote }}
+{{- end }}
+{{- /* ================================================ */}}
+{{- /* Services */}}
+{{- /* ================================================ */}}
+            - name: PORT
+              value: {{ .Values.service.port | quote }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.service.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.service.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.service.livenessProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.service.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.service.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.service.readinessProbe.failureThreshold }}
+          resources:
+{{ toYaml .Values.resources | trim | indent 12 }}
+{{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml . | trim | indent 8 }}
+{{- end }}
+{{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | trim | indent 8 }}
+{{- end }}
+{{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | trim | indent 8 }}
+{{- end }}
+{{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | trim | indent 8 }}
+{{- end -}}

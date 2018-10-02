@@ -1,0 +1,30 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "omgshop.fullname" . }}
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ template "omgshop.name" . }}
+    helm.sh/chart: {{ template "omgshop.chart" . }}
+{{- with .Values.ingress.annotations }}
+  annotations:
+{{ toYaml . | trim | indent 4 }}
+{{- end }}
+spec:
+  rules:
+{{- range .Values.ingress.hosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - path: {{ $.Values.ingress.path }}
+            backend:
+              serviceName: {{ template "omgshop.fullname" $ }}
+              servicePort: http
+{{- end }}
+{{- with .Values.ingress.tls }}
+  tls:
+{{ toYaml . | trim | indent 4 }}
+{{- end }}
+{{- end -}}

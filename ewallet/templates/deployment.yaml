@@ -28,12 +28,18 @@ spec:
 {{- /* ================================================ */}}
 {{- /* Pod Environment */}}
 {{- /* ================================================ */}}
-            - name: NODE_DNS
-              value: {{ template "ewallet.fullname" . }}
+            - name: DEPLOYMENT_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
             - name: NODE_HOST
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+            - name: NODE_NAME
+              value: {{ template "ewallet.fullname" . }}
+            - name: NODE_DNS
+              value: $(NODE_NAME).$(DEPLOYMENT_NAMESPACE).svc.cluster.local
 {{- /* ================================================ */}}
 {{- /* Application Environment */}}
 {{- /* ================================================ */}}

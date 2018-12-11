@@ -113,6 +113,30 @@ smtpPassword: ""
 
 
 ## ============================================================================
+## File Upload
+## ============================================================================
+
+## File Storage Adapter
+##
+## One of local, aws (Amazon S3), or gcs (Google Cloud Storage).
+## See also the next section for credentials.
+##
+fileStorageAdapter: "local"
+
+## Amazon AWS Configurations
+##
+awsBucket: ""
+awsRegion: ""
+awsAccessKeyId: ""
+awsSecretAccessKey: ""
+
+## Google Cloud Storage Configurations
+##
+gcsBucket: ""
+gcsCredentialsPath: ""
+
+
+## ============================================================================
 ## Monitoring
 ## ============================================================================
 
@@ -219,8 +243,8 @@ postgresql:
 
     ## Claim access and sizes
     ##
-    ## The size of the claim depends on how much traffic you expected
-    ## to have. Note that you cannot easily resize PVC once it's created.
+    ## The size of the claim depends on how much traffic is expected.
+    ## Note that PVC cannot be easily resized once created.
     ##
     accessMode: ReadWriteOnce
     size: 1Gi

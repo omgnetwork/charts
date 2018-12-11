@@ -96,6 +96,28 @@ spec:
                   name: {{ template "ewallet.fullname" . }}
                   key: smtp-password
 {{- end }}
+{{- if eq .Values.fileStorageAdapter "local" }}
+            - name: FILE_STORAGE_ADAPTER
+              value: "local"
+{{- else if eq .Values.fileStorageAdapter "aws" }}
+            - name: FILE_STORAGE_ADAPTER
+              value: "aws"
+            - name: AWS_BUCKET
+              value: {{ .Values.awsBucket | quote }}
+            - name: AWS_REGION
+              value: {{ .Values.awsRegion | quote }}
+            - name: AWS_ACCESS_KEY_ID
+              value: {{ .Values.awsAccessKeyId | quote }}
+            - name: AWS_SECRET_ACCESS_KEY
+              value: {{ .Values.awsSecretAccessKey | quote }}
+{{- else if eq .Values.fileStorageAdapter "gcs" }}
+            - name: FILE_STORAGE_ADAPTER
+              value: gcs
+            - name: GCS_BUCKET
+              value: {{ .Values.gcsBucket | quote }}
+            - name: GCS_CREDENTIALS
+              value: {{ .Values.gcsCredentialsPath | quote }}
+{{- end }}
 {{- /* ================================================ */}}
 {{- /* Database Configuration */}}
 {{- /* ================================================ */}}

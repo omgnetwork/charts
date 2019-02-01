@@ -81,6 +81,9 @@ spec:
             - name: REDIRECT_URL_PREFIXES
               value: {{ .Values.redirectPrefixes | quote }}
 {{- end }}
+{{- if eq .Values.emailAdapter "smtp" }}
+            - name: EMAIL_ADAPTER
+              value: "smtp"
 {{- if .Values.senderEmail | default "" | ne "" }}
             - name: SENDER_EMAIL
               value: {{ .Values.senderEmail | quote }}
@@ -103,6 +106,10 @@ spec:
                 secretKeyRef:
                   name: {{ template "ewallet.fullname" . }}
                   key: smtp-password
+{{- end }}
+{{- else if .Values.emailAdapter | default "" | ne "" }}
+            - name: EMAIL_ADAPTER
+              value: {{ .Values.emailAdapter | quote }}
 {{- end }}
 {{- if eq .Values.fileStorageAdapter "local" }}
             - name: FILE_STORAGE_ADAPTER
@@ -146,7 +153,7 @@ spec:
               value: postgresql://ledger:$(LOCAL_LEDGER_DATABASE_PASSWORD)@{{ template "postgresql.fullname" . }}/local_ledger
 {{- else }}
             - name: DATABASE_URL
-              value: {{ required "eWalletDbUrl is required to be set" .Values.ewalletDbUrl | quote }}
+              value: {{ required "ewalletDbUrl is required to be set" .Values.ewalletDbUrl | quote }}
             - name: LOCAL_LEDGER_DATABASE_URL
               value: {{ required "localLedgerDbUrl is required to be set" .Values.localLedgerDbUrl | quote }}
 {{- end }}
@@ -156,6 +163,14 @@ spec:
 {{- if .Values.sentryDsn | default "" | ne "" }}
             - name: SENTRY_DSN
               value: {{ .Values.sentryDsn }}
+{{- end }}
+{{- if .Values.appSignalPushApiKey | default "" | ne "" }}
+            - name: APPSIGNAL_PUSH_API_KEY
+              value: {{ .Values.appSignalPushApiKey }}
+{{- end }}
+{{- if .Values.appSignalAppEnv | default "" | ne "" }}
+            - name: APPSIGNAL_APP_ENV
+              value: {{ .Values.appSignalAppEnv }}
 {{- end }}
 {{- /* ================================================ */}}
 {{- /* Services */}}

@@ -71,7 +71,7 @@ spec:
               value: postgresql://ledger:$(LOCAL_LEDGER_DATABASE_PASSWORD)@{{ template "postgresql.fullname" . }}/local_ledger
 {{- else }}
             - name: DATABASE_URL
-              value: {{ required "eWalletDbUrl is required to be set" .Values.ewalletDbUrl | quote }}
+              value: {{ required "ewalletDbUrl is required to be set" .Values.ewalletDbUrl | quote }}
             - name: LOCAL_LEDGER_DATABASE_URL
               value: {{ required "localLedgerDbUrl is required to be set" .Values.localLedgerDbUrl | quote }}
 {{- end }}

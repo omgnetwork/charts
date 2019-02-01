@@ -117,6 +117,13 @@ redirectPrefixes:
 ##
 senderEmail: ""
 
+## Email adapter cnofiguration.
+##
+## Must be one of smtp, local or test. Usually you would want to set this to smtp
+## and configure the SMTP server configuration below.
+##
+emailAdapter: "smtp"
+
 ## SMTP server configuration.
 ##
 ## Credentials for SMTP server the eWallet server will use to send email from.
@@ -161,6 +168,11 @@ gcsCredentialsPath: ""
 ## See also https://github.com/helm/charts/blob/master/stable/sentry/
 ##
 sentryDsn: ""
+
+## AppSignal Push API key for Application Performance Monitoring.
+##
+appSignalPushApiKey: ""
+appSignalAppEnv: ""
 
 
 ## ============================================================================

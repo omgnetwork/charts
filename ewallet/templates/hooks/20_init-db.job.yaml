@@ -25,11 +25,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-            - sh
-            - -c
-          args:
-            - set -xe;
-              mix do local.hex --force, local.rebar --force, ecto.migrate
+            - initdb
           env:
 {{- /* ================================================ */}}
 {{- /* Application Environment */}}
@@ -40,7 +36,7 @@ spec:
 {{- /* Application Configuration */}}
 {{- /* ================================================ */}}
             - name: BASE_URL
-              value: {{ required "baseUrl must be set" .Values.baseUrl | quote }}
+              value: {{ .Values.baseUrl | quote }}
             - name: EWALLET_SECRET_KEY
               valueFrom:
                 secretKeyRef:

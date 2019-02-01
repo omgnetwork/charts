@@ -9,7 +9,7 @@
 
 image:
   repository: omisego/ewallet
-  tag: "v1.0.0"
+  tag: "v1.1.0"
   pullPolicy: IfNotPresent
 
   ## Secret name to pull from a private registry.

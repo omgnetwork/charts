@@ -45,13 +45,6 @@ erlangCookie: ""
 ## Application configuration
 ## ============================================================================
 
-## Base URL for generating URLs in emails, etc.
-##
-## Must omit trailing slash and include the protocol.
-## For example: https://www.example.com
-##
-baseUrl: ""
-
 ## Secret key for encrypting eWallet metadata.
 ##
 ## A 32-bytes base64-encoded key for encrypting user metadata in eWallet.
@@ -83,79 +76,6 @@ ewalletDbUrl: ""
 ## This value is required unless `postgresql.enabled` is true.
 ##
 localLedgerDbUrl: ""
-
-## Balance caching configuration.
-##
-## eWallet server will periodically compute snapshots for user balance
-## to speed up operations. `balanceCachingFrequency` is in cron format and
-## strategy can be either `since_begining` or `since_last_cached`.
-##
-## See also https://github.com/omisego/ewallet/blob/master/docs/setup/advanced/env.md#balance-caching
-##
-balanceCachingFrequency: ""
-balanceCachingStrategy: "since_last_cached"
-
-## Enable standalone mode.
-##
-## Enabling standalone will allow eWallet to work independent of an external
-## integration. Setting this to false will make eWallet require integration
-## with external system.
-##
-standalone: false
-
-## Redirect endpoints configuration.
-##
-## Restrict external redirects in eWallet endpoints (e.g. email verification)
-## to specific domain. Comma-separated list of prefixes e.g. http://example.com/
-##
-redirectPrefixes:
-
-## Email address to send system email as
-##
-## All email sent from the eWallet server (e.g. invitations) will use
-## this address. The address must also allowed by the SMTP server.
-##
-senderEmail: ""
-
-## Email adapter cnofiguration.
-##
-## Must be one of smtp, local or test. Usually you would want to set this to smtp
-## and configure the SMTP server configuration below.
-##
-emailAdapter: "smtp"
-
-## SMTP server configuration.
-##
-## Credentials for SMTP server the eWallet server will use to send email from.
-##
-smtpHost: ""
-smtpPort: ""
-smtpUser: ""
-smtpPassword: ""
-
-
-## ============================================================================
-## File Upload
-## ============================================================================
-
-## File Storage Adapter
-##
-## One of local, aws (Amazon S3), or gcs (Google Cloud Storage).
-## See also the next section for credentials.
-##
-fileStorageAdapter: "local"
-
-## Amazon AWS Configurations
-##
-awsBucket: ""
-awsRegion: ""
-awsAccessKeyId: ""
-awsSecretAccessKey: ""
-
-## Google Cloud Storage Configurations
-##
-gcsBucket: ""
-gcsCredentialsPath: ""
 
 
 ## ============================================================================
@@ -275,3 +195,89 @@ postgresql:
     ##
     accessMode: ReadWriteOnce
     size: 1Gi
+
+
+## ============================================================================
+## DEPRECATED CONFIGURATIONS
+##
+## These configurations are deprecated as of v1.1 and may be removed in the
+## future release. However, if they are set, the eWallet Server will attempt
+## to migrate to new settings format in the database.
+##
+## You should gradually removing them.
+## ============================================================================
+
+## Base URL for generating URLs in emails, etc.
+##
+## Must omit trailing slash and include the protocol.
+## For example: https://www.example.com
+##
+baseUrl: ""
+
+## Balance caching configuration.
+##
+## eWallet server will periodically compute snapshots for user balance
+## to speed up operations. `balanceCachingFrequency` is in cron format and
+## strategy can be either `since_begining` or `since_last_cached`.
+##
+## See also https://github.com/omisego/ewallet/blob/master/docs/setup/advanced/env.md#balance-caching
+##
+balanceCachingFrequency: ""
+balanceCachingStrategy: "since_last_cached"
+
+## Enable standalone mode.
+##
+## Enabling standalone will allow eWallet to work independent of an external
+## integration. Setting this to false will make eWallet require integration
+## with external system.
+##
+standalone: false
+
+## Redirect endpoints configuration.
+##
+## Restrict external redirects in eWallet endpoints (e.g. email verification)
+## to specific domain. Comma-separated list of prefixes e.g. http://example.com/
+##
+redirectPrefixes:
+
+## Email address to send system email as
+##
+## All email sent from the eWallet server (e.g. invitations) will use
+## this address. The address must also allowed by the SMTP server.
+##
+senderEmail: ""
+
+## Email adapter cnofiguration.
+##
+## Must be one of smtp, local or test. Usually you would want to set this to smtp
+## and configure the SMTP server configuration below.
+##
+emailAdapter: "smtp"
+
+## SMTP server configuration.
+##
+## Credentials for SMTP server the eWallet server will use to send email from.
+##
+smtpHost: ""
+smtpPort: ""
+smtpUser: ""
+smtpPassword: ""
+
+## File Storage Adapter
+##
+## One of local, aws (Amazon S3), or gcs (Google Cloud Storage).
+## See also the next section for credentials.
+##
+fileStorageAdapter: "local"
+
+## Amazon AWS Configurations
+##
+awsBucket: ""
+awsRegion: ""
+awsAccessKeyId: ""
+awsSecretAccessKey: ""
+
+## Google Cloud Storage Configurations
+##
+gcsBucket: ""
+gcsCredentialsPath: ""

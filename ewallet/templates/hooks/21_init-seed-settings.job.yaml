@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "ewallet.fullname" . }}-init-migrate-db
+  name: {{ template "ewallet.fullname" . }}-init-seed-settings
   labels:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -14,22 +14,21 @@ metadata:
 spec:
   template:
     metadata:
-      name: {{ template "ewallet.fullname" . }}-init-migrate-db
+      name: {{ template "ewallet.fullname" . }}-init-seed-settings
       labels:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/name: {{ template "ewallet.name" . }}
     spec:
       restartPolicy: Never
       containers:
-        - name: {{ .Chart.Name }}-init-migrate-db
+        - name: {{ .Chart.Name }}-init-seed-settings
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - bin/ewallet
-            - config
+            - seed
           args:
-            - -m
-            - -y
+            - --settings
           env:
 {{- /* ================================================ */}}
 {{- /* Application Environment */}}
@@ -87,74 +86,6 @@ spec:
 {{- if .Values.appSignalAppEnv | default "" | ne "" }}
             - name: APPSIGNAL_APP_ENV
               value: {{ .Values.appSignalAppEnv }}
-{{- end }}
-{{- /* ================================================ */}}
-{{- /* Migration */}}
-{{- /* ================================================ */}}
-{{- if .Values.baseUrl | default "" | ne "" }}
-            - name: BASE_URL
-              value: {{ .Values.baseUrl | quote }}
-{{- end }}
-{{- if .Values.standalone | default "" | ne "" }}
-            - name: ENABLE_STANDALONE
-              value: {{ .Values.standalone | quote }}
-{{- end }}
-{{- if .Values.balanceCachingStrategy | default "" | ne "" }}
-            - name: BALANCE_CACHING_STRATEGY
-              value: {{ .Values.balanceCachingStrategy | quote }}
-{{- end }}
-{{- if .Values.redirectPrefixes | default "" | ne "" }}
-            - name: REDIRECT_URL_PREFIXES
-              value: {{ .Values.redirectPrefixes | quote }}
-{{- end }}
-{{- if eq .Values.emailAdapter "smtp" }}
-            - name: EMAIL_ADAPTER
-              value: "smtp"
-{{- if .Values.senderEmail | default "" | ne "" }}
-            - name: SENDER_EMAIL
-              value: {{ .Values.senderEmail | quote }}
-{{- end }}
-{{- if .Values.smtpHost | default "" | ne "" }}
-            - name: SMTP_HOST
-              value: {{ .Values.smtpHost | quote }}
-{{- end }}
-{{- if .Values.smtpPort | default "" | ne "" }}
-            - name: SMTP_PORT
-              value: {{ .Values.smtpPort | quote }}
-{{- end }}
-{{- if .Values.smtpUser | default "" | ne "" }}
-            - name: SMTP_USER
-              value: {{ .Values.smtpUser | quote }}
-{{- end }}
-{{- if .Values.smtpPassword | default "" | ne "" }}
-            - name: SMTP_PASSWORD
-              value: {{ .Values.smtpPassword | quote }}
-{{- end }}
-{{- else if .Values.emailAdapter | default "" | ne "" }}
-            - name: EMAIL_ADAPTER
-              value: {{ .Values.emailAdapter | quote }}
-{{- end }}
-{{- if eq .Values.fileStorageAdapter "local" }}
-            - name: FILE_STORAGE_ADAPTER
-              value: "local"
-{{- else if eq .Values.fileStorageAdapter "aws" }}
-            - name: FILE_STORAGE_ADAPTER
-              value: "aws"
-            - name: AWS_BUCKET
-              value: {{ .Values.awsBucket | quote }}
-            - name: AWS_REGION
-              value: {{ .Values.awsRegion | quote }}
-            - name: AWS_ACCESS_KEY_ID
-              value: {{ .Values.awsAccessKeyId | quote }}
-            - name: AWS_SECRET_ACCESS_KEY
-              value: {{ .Values.awsSecretAccessKey | quote }}
-{{- else if eq .Values.fileStorageAdapter "gcs" }}
-            - name: FILE_STORAGE_ADAPTER
-              value: gcs
-            - name: GCS_BUCKET
-              value: {{ .Values.gcsBucket | quote }}
-            - name: GCS_CREDENTIALS
-              value: {{ .Values.gcsCredentialsPath | quote }}
 {{- end }}
 {{- with .Values.image.pullSecrets }}
       imagePullSecrets:

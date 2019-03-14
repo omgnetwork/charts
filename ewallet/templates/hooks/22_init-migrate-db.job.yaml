@@ -88,6 +88,10 @@ spec:
             - name: APPSIGNAL_APP_ENV
               value: {{ .Values.appSignalAppEnv }}
 {{- end }}
+{{- if .Values.appSignalVmMetrics | default "" | ne "" }}
+            - name: METRICS
+              value: {{ .Values.appSignalVmMetrics | quote }}
+{{- end }}
 {{- /* ================================================ */}}
 {{- /* Migration */}}
 {{- /* ================================================ */}}

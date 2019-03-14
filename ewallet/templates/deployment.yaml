@@ -89,6 +89,14 @@ spec:
             - name: LOCAL_LEDGER_DATABASE_URL
               value: {{ required "localLedgerDbUrl is required to be set" .Values.localLedgerDbUrl | quote }}
 {{- end }}
+{{- if .Values.ewalletDbPoolSize | default "" | ne "" }}
+            - name: EWALLET_POOL_SIZE
+              value: {{ .Values.ewalletDbPoolSize | quote }}
+{{- end }}
+{{- if .Values.localLedgerDbPoolSize | default "" | ne "" }}
+            - name: LOCAL_LEDGER_POOL_SIZE
+              value: {{ .Values.localLedgerDbPoolSize | quote }}
+{{- end }}
 {{- /* ================================================ */}}
 {{- /* Monitoring */}}
 {{- /* ================================================ */}}
@@ -103,6 +111,10 @@ spec:
 {{- if .Values.appSignalAppEnv | default "" | ne "" }}
             - name: APPSIGNAL_APP_ENV
               value: {{ .Values.appSignalAppEnv }}
+{{- end }}
+{{- if .Values.appSignalVmMetrics | default "" | ne "" }}
+            - name: METRICS
+              value: {{ .Values.appSignalVmMetrics | quote }}
 {{- end }}
 {{- /* ================================================ */}}
 {{- /* Services */}}

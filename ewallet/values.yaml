@@ -77,6 +77,18 @@ ewalletDbUrl: ""
 ##
 localLedgerDbUrl: ""
 
+## Configure the pool size for eWallet databases.
+##
+## This value will limit the number of connections from the eWallet Server
+## to the database. Reducing this value may decrease performance.
+ewalletDbPoolSize: 15
+
+## Configure the pool size for local ledger database.
+##
+## This value will limit the number of connections from the local ledger
+## to the database. Reducing this value may decrease performance.
+localLedgerDbPoolSize: 5
+
 
 ## ============================================================================
 ## Monitoring
@@ -93,6 +105,9 @@ sentryDsn: ""
 ##
 appSignalPushApiKey: ""
 appSignalAppEnv: ""
+
+## Enable VM metrics in AppSignal Performance Monitoring.
+appSignalVmMetrics: false
 
 
 ## ============================================================================

@@ -89,11 +89,11 @@ spec:
             - name: LOCAL_LEDGER_DATABASE_URL
               value: {{ required "localLedgerDbUrl is required to be set" .Values.localLedgerDbUrl | quote }}
 {{- end }}
-{{- if .Values.ewalletDbPoolSize | default "" | ne "" }}
+{{- if .Values.ewalletDbPoolSize | default 0 | ne 0 }}
             - name: EWALLET_POOL_SIZE
               value: {{ .Values.ewalletDbPoolSize | quote }}
 {{- end }}
-{{- if .Values.localLedgerDbPoolSize | default "" | ne "" }}
+{{- if .Values.localLedgerDbPoolSize | default 0 | ne 0 }}
             - name: LOCAL_LEDGER_POOL_SIZE
               value: {{ .Values.localLedgerDbPoolSize | quote }}
 {{- end }}

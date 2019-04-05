@@ -55,10 +55,16 @@ ewalletSecretKey: ""
 ## Secret key for encrypting local ledger metadata.
 ##
 ## A 32-bytes base64-encoded key for encrypting ledger metadata in eWallet.
-## When unset, it will use the same key as secretKey.
 ## Can be generated with `openssl rand -base64 32`
 ##
 localLedgerSecretKey: ""
+
+## Secret key for encrypting keychain.
+##
+## A 32-bytes base64-encoded key for encrypting private keys.
+## Can be generated with `openssl rand -base64 32`
+##
+keychainSecretKey: ""
 
 ## PostgreSQL database URL for eWallet server.
 ##

@@ -41,12 +41,12 @@ spec:
             - name: EWALLET_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "ewallet.fullname" . }}
+                  name: {{ template "ewallet.fullname" . }}-init
                   key: ewallet-secret-key
             - name: LOCAL_LEDGER_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "ewallet.fullname" . }}
+                  name: {{ template "ewallet.fullname" . }}-init
                   key: local-ledger-secret-key
 {{- /* ================================================ */}}
 {{- /* Database Configuration */}}

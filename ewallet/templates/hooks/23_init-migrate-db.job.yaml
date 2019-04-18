@@ -52,7 +52,7 @@ spec:
             - name: KEYCHAIN_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "ewallet.fullname" . }}
+                  name: {{ template "ewallet.fullname" . }}-init
                   key: keychain-secret-key
 {{- /* ================================================ */}}
 {{- /* Database Configuration */}}

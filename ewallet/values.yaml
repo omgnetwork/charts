@@ -89,6 +89,14 @@ ewalletDbPoolSize: 15
 ## to the database. Reducing this value may decrease performance.
 localLedgerDbPoolSize: 5
 
+## ============================================================================
+## Ethereum integration
+## ============================================================================
+
+## Configure the URL to the Ethereum node
+##
+## Must be a full URL, e.g. http://ethereum_node:8545.
+ethereumNodeUrl: ""
 
 ## ============================================================================
 ## Monitoring

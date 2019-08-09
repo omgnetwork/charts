@@ -73,6 +73,13 @@ spec:
               value: {{ required "localLedgerDbUrl is required to be set" .Values.localLedgerDbUrl | quote }}
 {{- end }}
 {{- /* ================================================ */}}
+{{- /* Blockchain Configuration */}}
+{{- /* ================================================ */}}
+{{- if .Values.ethereumNodeUrl | default "" | ne "" }}
+            - name: JSON_RPC_GETH_NODE_URL
+              value: {{ .Values.ethereumNodeUrl }}
+{{- end }}
+{{- /* ================================================ */}}
 {{- /* Monitoring */}}
 {{- /* ================================================ */}}
 {{- if .Values.sentryDsn | default "" | ne "" }}

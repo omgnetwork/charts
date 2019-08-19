@@ -49,6 +49,11 @@ spec:
                 secretKeyRef:
                   name: {{ template "ewallet.fullname" . }}-init
                   key: local-ledger-secret-key
+            - name: KEYCHAIN_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "ewallet.fullname" . }}-init
+                  key: keychain-secret-key
 {{- /* ================================================ */}}
 {{- /* Database Configuration */}}
 {{- /* ================================================ */}}

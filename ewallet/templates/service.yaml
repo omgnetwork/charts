@@ -64,3 +64,4 @@ spec:
   selector:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/name: {{ template "ewallet.name" . }}
+    app.kubernetes.io/component: {{ template "ewallet.name" . }}

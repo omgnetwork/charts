@@ -22,6 +22,9 @@ spec:
         app.kubernetes.io/name: {{ template "ewallet.name" . }}
         app.kubernetes.io/component: {{ template "ewallet.name" . }}
     spec:
+    {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Values.serviceAccount.name | default .Chart.Name }}
+    {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -198,5 +201,9 @@ spec:
 {{- end }}
 {{- with .Values.tolerations }}
       tolerations:
+{{ toYaml . | trim | indent 8 }}
+{{- end }}
+{{- with .Values.annotations }}
+      annotations:
 {{ toYaml . | trim | indent 8 }}
 {{- end }}

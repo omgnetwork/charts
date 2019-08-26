@@ -159,6 +159,18 @@ ingress:
 
 
 ## ============================================================================
+## Service Account
+## ============================================================================
+
+## Create optional service account
+## Service account name can be specified, 
+## if not chart's name (`ewallet`) will be used as service account name
+serviceAccount:
+  create: false
+  # name:
+
+
+## ============================================================================
 ## Node configurations
 ## ============================================================================
 
@@ -166,6 +178,7 @@ resources: {}
 nodeSelector: {}
 tolerations: []
 affinity: {}
+annotations: {}
 
 
 ## ============================================================================
